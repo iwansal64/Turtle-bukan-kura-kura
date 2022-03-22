@@ -4,9 +4,11 @@ import sys
 from pynput import keyboard
 sys.path.append(r"D:\Dev\Python\Code")
 from Utility import Utility
+import racergame1save as save
 
 eventcode = ''
 finish = False
+
 def on_press(key):
     eventkey = ''
     try:
@@ -20,6 +22,8 @@ def on_press(key):
         global eventcode
         if eventkey == 'r':
             eventcode = 1
+        elif eventkey == 's':
+            eventcode = 2
         else:
             eventcode = 0
 
@@ -28,10 +32,33 @@ listen = keyboard.Listener(on_press)
 listen.start()
 
 
+load = input("menggunakan save save an terakhir? (y/n)")
+if load == "n":
+    load = False
+else:
+    load = True
 
 wasit = turtle
-bobGroupUnit = input("Masukkan Jumlah Grup (kosongkan jika gak ada grup) : ")
-bobGroup = True
+
+while True:
+    if load:
+        try:
+            bobGroupUnit = save.BobGroupUnit
+            bobGroupName = save.BobGroupName
+            bobGroup = save.BobGroupName
+            break
+        except AttributeError:
+            print("Tidak ada save save an beralih ke manual konfigurasi.")
+            load = False
+            continue
+        except Exception as e:
+            print("ERROR OCCURED : "+e)
+    else:
+        bobGroupUnit = input("Masukkan Jumlah Grup (kosongkan jika gak ada grup) : ")
+        bobGroupName = []
+        bobGroup = True
+        break
+
 bobArray = []
 
 try:
@@ -42,23 +69,38 @@ except:
 distanceBetweenGroup = 25
 if bobGroupUnit == "" or bobGroupUnit == 0:
     bobGroup = False
-    bobPlayerUnit = int(input("Masukkan Jumlah Player : "))
+    if load:
+        bobPlayerUnit = save.BobPlayerUnit
+    else:
+        bobPlayerUnit = int(input("Masukkan Jumlah Player : "))
     
 else:
-    bobPlayerUnit = int(input("Masukkan Jumlah Player Per Grup : "))
-    distanceBetweenGroup = int(input("Masukkan Jarak Per group : "))
+    if load:
+        bobPlayerUnit = save.BobPlayerUnit
+        distanceBetweenGroup = save.DistanceBetweenGroup
+    else:
+        bobPlayerUnit = int(input("Masukkan Jumlah Player Per Grup : "))
+        distanceBetweenGroup = int(input("Masukkan Jarak Per group : "))
 
 bobName = []
-if bobGroup:
-    for i in range(bobGroupUnit):
-        bobName.append([])
-        for j in range(bobPlayerUnit):
-            data = input('Masukkan nama player ke-'+str(j + 1)+" Group ke -"+str(i + 1)+" : ")
-            bobName[i].append(data)
+if load:
+    if bobGroup:
+        bobGroupName = save.BobGroupName
+    bobName = save.BobName
+
 else:
-    for i in range(bobPlayerUnit):
-        data = input('Masukkan nama player ke-'+str(i + 1)+" : ")
-        bobName.append(data)
+    if bobGroup:
+        for i in range(bobGroupUnit):
+            data = input("Masukkan nama group ke "+str(i + 1)+" : ")
+            bobGroupName.append(data)
+            bobName.append([])
+            for j in range(bobPlayerUnit):
+                data = input('Masukkan nama player ke-'+str(j + 1)+" Group ke -"+str(i + 1)+" : ")
+                bobName[i].append(data)
+    else:
+        for i in range(bobPlayerUnit):
+            data = input('Masukkan nama player ke-'+str(i + 1)+" : ")
+            bobName.append(data)
 
 bobs = []
 if not bobGroup:
@@ -81,9 +123,15 @@ startYPos = -225
 finishYPos = 10
 startDistance = int(input("Jarak per player dalam group saat mau mulai (default 50): "))
 
-timeSpeed = int(input("Masukkan kecepatan waktu (min 1, max 11): ")) # MAX 10
-minSpeed = int(input("Masukkan min speed : "))
-maxSpeed = int(input("Masukkan max speed : "))
+if load:
+    timeSpeed = save.TimeSpeed
+    minSpeed = save.MinSpeed
+    maxSpeed = save.MaxSpeed
+
+else:
+    timeSpeed = int(input("Masukkan kecepatan waktu (min 1, max 11): ")) # MAX 10
+    minSpeed = int(input("Masukkan min speed : "))
+    maxSpeed = int(input("Masukkan max speed : "))
 
 if timeSpeed > 11:
     timeSpeed = 10
@@ -96,15 +144,19 @@ if maxSpeed < minSpeed:
     maxSpeed += minSpeed
 
 colors = ["blue", "gray", "purple", "#291053", "#acfc21", "#1ac123"]
-data = input('warna?')
-if data == "y":
-    colors = []
-    while True:
-        data = input("Masukkan warna (bisa hex atau nama warna)")
-        if data == "":
-            break
-        else:
-            colors.append(data)
+
+if load:
+    colors = save.Colors
+else:
+    data = input('warna?')
+    if data == "y":
+        colors = []
+        while True:
+            data = input("Masukkan warna (bisa hex atau nama warna dalam bing)")
+            if data == "":
+                break
+            else:
+                colors.append(data)
 
 wasit.color("green")
 
@@ -238,7 +290,6 @@ while True:
             
             h += 1
             
-            turtle.clearscreen()
             while finish:
                 continue
     
@@ -249,11 +300,27 @@ while True:
             elif eventcode == 1:
                 bobPos = {}
                 break
+            elif eventcode == 2:
+                with open("racergame1save.py", "w+") as f:
+                    f.write(f"""BobGroupUnit = {bobGroupUnit}
+BobGroupName = {bobGroupName}
+BobGroup = {bobGroup}
+BobPlayerUnit = {bobPlayerUnit}
+BobName = {bobName}
+Colors = {colors}
+DistanceBetweenGroup = {distanceBetweenGroup}
+TimeSpeed = {timeSpeed}
+MinSpeed = {minSpeed}
+MaxSpeed = {maxSpeed}
+                    """)
+                turtle.bye()
+                run = False
+                break
 
         if eventcode == 1:
             break
 
-    if eventcode == 0:
+    if eventcode == 0 or eventcode == 2:
         break
 
     elif eventcode == 1:
