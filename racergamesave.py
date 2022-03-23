@@ -1,0 +1,12 @@
+BobGroupUnit = [2, 0, 0, 0]
+BobGroupName = [['A', 'B'], [], [], []]
+BobGroup = [True, False, False, False]
+BobPlayerUnit = [2, 0, 0, 0]
+BobName = [[['Acad', 'Aku'], ['Kucing', 'Garong']], 0, 0, 0]
+Colors = [['#291053', 'purple', '#acfc21', 'gray', '#1ac123', 'blue'], [], [], []]
+DistanceBetweenGroup = [25, 0, 0, 0]
+TimeSpeed = [7, 0, 0, 0]
+MinSpeed = [5, 0, 0, 0]
+MaxSpeed = [25, 0, 0, 0]
+StartDistance = [15, 0, 0, 0]
+                    
